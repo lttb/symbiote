@@ -1,0 +1,30 @@
+{
+  "name": "@symbiote/react",
+  "version": "0.0.0",
+  "main": "index.js",
+  "author": "lttb <kenzhaev.artur@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "rm -rf ./lib",
+    "build": "babel src --out-dir lib --ignore 'src/**/spec/*'",
+    "postbuild": "npm run cp:meta",
+    "cp:meta": "copyfiles -e 'src/**/spec/**' yarn.lock package.json README.md './.*' 'src/.*' -a -f lib"
+  },
+  "dependencies": {
+    "nanoid": "^2.0.3"
+  },
+  "peerDependencies": {
+    "react": ">= 15.6.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.0",
+    "@babel/preset-env": "^7.2.0",
+    "@babel/preset-react": "^7.0.0",
+    "copyfiles": "^2.1.0"
+  }
+}
