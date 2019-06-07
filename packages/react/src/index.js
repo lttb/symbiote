@@ -113,6 +113,9 @@ export const enhance = Base => {
             const name = this.constructor.toString();
 
             this.registry = context[name] || {};
+            if (typeof this.registry === 'function') {
+                this.registry = this.registry.context || {}
+            }
             this.defaultRegistry = this.constructor.context || {};
 
             if (!this.state) this.state = {};
