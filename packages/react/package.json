@@ -11,7 +11,8 @@
     "prebuild": "rm -rf ./lib",
     "build": "babel src --out-dir lib --ignore 'src/**/spec/*'",
     "postbuild": "npm run cp:meta",
-    "cp:meta": "copyfiles -e 'src/**/spec/**' yarn.lock package.json README.md './.*' 'src/.*' -a -f lib"
+    "cp:meta": "copyfiles -e 'src/**/spec/**' yarn.lock package.json README.md './.*' 'src/*' -a -f lib",
+    "cp:flow": "flow-copy-source src lib"
   },
   "dependencies": {
     "nanoid": "^2.0.3"
@@ -25,6 +26,7 @@
     "@babel/plugin-proposal-class-properties": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
+    "flow-copy-source": "2.0.6",
     "copyfiles": "^2.1.0"
   }
 }
