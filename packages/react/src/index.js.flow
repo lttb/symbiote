@@ -1,17 +1,17 @@
 /* @flow */
 
-import type {AbstractComponent, ElementConfig} from 'react';
+import type {ComponentType, ElementConfig} from 'react';
 
 declare export function createRegistry(): {
-    RegistryProvider: AbstractComponent<{...}>,
-    RegistryContext: React$Context<{...}>,
-    registry: {...},
+    RegistryProvider: ComponentType<{}>,
+    RegistryContext: React$Context<{}>,
+    registry: {},
     register: <Context, Base>(
-        AbstractComponent<Base>,
+        ComponentType<Base>,
         Context,
     ) => <Current>(
         Current,
-    ) => AbstractComponent<
+    ) => ComponentType<
         $Exact<{
             ...$Exact<$Diff<ElementConfig<Current>, Context>>,
             ...$Diff<

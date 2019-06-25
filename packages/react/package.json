@@ -11,7 +11,7 @@
     "prebuild": "rm -rf ./lib",
     "build": "babel src --out-dir lib --ignore 'src/**/spec/*'",
     "postbuild": "npm run cp:meta",
-    "cp:meta": "copyfiles -e 'src/**/spec/**' yarn.lock package.json README.md './.*' 'src/*' -a -f lib",
+    "cp:meta": "copyfiles -e 'src/**/spec/**' yarn.lock package.json README.md './.*' 'src/**/*.flow' -a -f lib",
     "cp:flow": "flow-copy-source src lib"
   },
   "dependencies": {
