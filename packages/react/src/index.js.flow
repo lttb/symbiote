@@ -2,6 +2,8 @@
 
 import type {ComponentType, ElementConfig} from 'react';
 
+type OptionalProps<T> = $ObjMap<T, <V>(V) => V | void>
+
 declare export function createRegistry(): {
     RegistryProvider: ComponentType<{}>,
     RegistryContext: React$Context<{}>,
@@ -12,12 +14,12 @@ declare export function createRegistry(): {
     ) => <Current>(
         Current,
     ) => ComponentType<
-        $Exact<{
-            ...$Exact<$Diff<ElementConfig<Current>, Context>>,
+        {
+            ...$Exact<$Diff<ElementConfig<Current>, OptionalProps<Context>>>,
             ...$Diff<
                 ElementConfig<Current>,
-                $Diff<ElementConfig<Current>, Context>,
+                $Diff<ElementConfig<Current>, OptionalProps<Context>>,
             >,
-        }>,
+        },
     >,
 };
