@@ -71,12 +71,14 @@ export const {
 } = createRegistry();
 export const {Consumer, Provider} = RegistryContext;
 
-const SELF = Symbol('self');
-const MERGE_PROPS = Symbol('merge props');
-const PROPS = Symbol('props');
-const CONTEXT_PROPS = Symbol('context props');
-const RENDER = Symbol('render');
-const DI = Symbol('di');
+const symbol = key => typeof Symbol !== undefined ? Symbol(key) : `__${key}__`
+
+const SELF = symbol('self');
+const MERGE_PROPS = symbol('merge props');
+const PROPS = symbol('props');
+const CONTEXT_PROPS = symbol('context props');
+const RENDER = symbol('render');
+const DI = symbol('di');
 
 export const enhance = Base => {
     const Comp = isClassComponent(Base)
@@ -120,25 +122,34 @@ export const enhance = Base => {
 
             if (!this.state) this.state = {};
 
-            this.state[SELF] = this;
+            Object.defineProperty(this.state, SELF, {
+                value: this,
+                enumerable: false,
+            })
 
             if (this.componentDidMount) {
                 this.componentDidMount = () => {
-                    this.props = this[CONTEXT_PROPS];
+                    const PREV_PROPS = this.props;
+                    this.props = this._props;
 
                     if (super.componentDidMount) {
                         super.componentDidMount();
                     }
+
+                    this.props = PREV_PROPS;
                 };
             }
 
             if (this.componentDidUpdate) {
                 this.componentDidUpdate = () => {
-                    this.props = this[CONTEXT_PROPS];
+                    const PREV_PROPS = this.props;
+                    this.props = this._props;
 
                     if (super.componentDidUpdate) {
                         super.componentDidUpdate();
                     }
+
+                    this.props = PREV_PROPS;
                 };
             }
 
@@ -167,10 +178,10 @@ export const enhance = Base => {
         }
 
         render() {
+            const PREV_PROPS = this.props
             this.props = this._props;
             const result = this[RENDER]();
-            this[CONTEXT_PROPS] = this.props;
-            this.props = this[PROPS];
+            this.props = PREV_PROPS;
             return result;
         }
 
