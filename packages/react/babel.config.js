@@ -4,7 +4,6 @@ module.exports = {
       '@babel/preset-env',
       {
         loose: true,
-        targets: '> 1%, not IE 11, not dead',
       },
     ],
     '@babel/preset-react',
