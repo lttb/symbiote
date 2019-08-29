@@ -41,6 +41,7 @@ export const createRegistry = () => {
 
                 Object.defineProperty(Comp, key, {
                     value: IComp[key],
+                    writable: true,
                 });
             });
 
