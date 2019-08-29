@@ -1,14 +1,21 @@
 import React from 'react';
 import nanoid from 'nanoid';
 
-const isClassComponent = Base =>
-    Base === React.Component ||
-    Base === React.PureComponent ||
+const isClassComponent = Comp =>
+Comp === React.Component ||
+Comp === React.PureComponent ||
     Boolean(
-        Base && Base.prototype && typeof Base.prototype.render === 'function',
+        Comp && Comp.prototype && typeof Comp.prototype.render === 'function',
     );
 
-const getDisplayName = Base => Base.displayName || Base.name || 'Component';
+const getDisplayName = Comp => Comp.displayName || Comp.name || 'Component';
+const getOwnDisplayName = Comp => {
+    if (Comp.hasOwnProperty('displayName')) {
+        return Comp.displayName
+    }
+
+    return Comp.name
+}
 
 export const createRegistry = () => {
     const registry = {};
@@ -36,6 +43,8 @@ export const createRegistry = () => {
                     value: IComp[key],
                 });
             });
+
+            Comp.displayName = getOwnDisplayName(IComp) || Comp.displayName;
 
             return Comp;
         };
@@ -114,6 +123,7 @@ export const enhance = (Base, {
         static registry = registry;
         static toString = () => name;
         static context = context;
+        static Base = Base;
 
         static getDerivedStateFromError = Base.getDerivedStateFromError;
 
@@ -191,7 +201,7 @@ export const enhance = (Base, {
             let nextState = state
 
             if (!self.__base__) {
-                self.__base__ = new Comp(self._props)
+                self.__base__ = new Comp(self._props, self.context)
                 self.__base__.setState = self.__setState__
                 nextState = self.__base__.state || state;
                 self.__base__.props = nextProps

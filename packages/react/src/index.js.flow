@@ -8,7 +8,7 @@ declare export function createRegistry(): {
     RegistryProvider: ComponentType<{}>,
     RegistryContext: React$Context<{}>,
     registry: {},
-    register: <Context, Base>(
+    register: <Base, Context>(
         ComponentType<Base>,
         Context,
     ) => <Current>(
