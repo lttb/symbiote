@@ -1,25 +1,27 @@
 /* @flow */
 
+import React from 'react'
 import type {ComponentType, ElementConfig} from 'react';
 
-type OptionalProps<T> = $ObjMap<T, <V>(V) => V | void>
+declare class RegisteredComponent<P, D> extends React.Component<P> {
+    static defaultProps: D;
+}
+
+type Config<Props, DefaultProps> = ElementConfig<Class<RegisteredComponent<Props, DefaultProps>>>
+
+type MergeProps<OwnProps, ContextProps> = Config<
+    OwnProps,
+    $ObjMapi<ContextProps, <K>(K) => $ElementType<OwnProps, K>>
+>
 
 declare export function createRegistry(): {
     RegistryProvider: ComponentType<{}>,
     RegistryContext: React$Context<{}>,
     registry: {},
-    register: <Base, Context>(
-        ComponentType<Base>,
-        Context,
-    ) => <Current>(
-        Current,
-    ) => ComponentType<
-        {
-            ...$Exact<$Diff<ElementConfig<Current>, OptionalProps<Context>>>,
-            ...$Diff<
-                ElementConfig<Current>,
-                $Diff<ElementConfig<Current>, OptionalProps<Context>>,
-            >,
-        },
-    >,
+    register: <BaseComponent>(BaseComponent) => (
+        <InterfaceComponent>(InterfaceComponent) => ComponentType<MergeProps<
+            ElementConfig<InterfaceComponent>,
+            $ElementType<InterfaceComponent & {contextProps: {}}, 'contextProps'>
+        >>
+    )
 };

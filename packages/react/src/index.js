@@ -2,8 +2,8 @@ import React from 'react';
 import nanoid from 'nanoid';
 
 const isClassComponent = Comp =>
-Comp === React.Component ||
-Comp === React.PureComponent ||
+    Comp === React.Component ||
+    Comp === React.PureComponent ||
     Boolean(
         Comp && Comp.prototype && typeof Comp.prototype.render === 'function',
     );
@@ -22,20 +22,18 @@ export const createRegistry = () => {
 
     const RegistryContext = React.createContext(registry);
 
-    const register = (Base, context = {}) => {
-        const name = nanoid();
-
-        registry[name] = context;
-
+    const register = (Base) => {
         return IComp => {
-            class Comp extends enhance(Base, {
+            const name = nanoid();
+
+            registry[name] = Base.contextProps;
+
+            class Comp extends enhance(Base, IComp, {
                 RegistryContext,
                 registry,
                 name,
-                context,
             }) {}
 
-            // TODO: add property options
             Object.keys(IComp).forEach(key => {
                 if (key === 'name') return;
 
@@ -92,12 +90,13 @@ const CONTEXT_PROPS = symbol('context props');
 const RENDER = symbol('render');
 const DI = symbol('di');
 
-export const enhance = (Base, {
+export const enhance = (Base, IComp, {
     RegistryContext = defaults.RegistryContext,
     registry = defaults.registry,
     name = nanoid(),
-    context = {},
 }) => {
+    const {contextProps, mapProps} = IComp;
+
     const Comp = isClassComponent(Base)
         ? Base
         : class BaseComponent extends React.Component {
@@ -121,9 +120,11 @@ export const enhance = (Base, {
     class RegistryComponent extends Parent {
         static displayName = getDisplayName(Base);
         static contextType = RegistryContext;
-        static registry = registry;
         static toString = () => name;
-        static context = context;
+
+        static registry = registry;
+        static contextProps = contextProps;
+        static mapProps = mapProps;
         static Base = Base;
 
         static getDerivedStateFromError = Base.getDerivedStateFromError;
@@ -141,7 +142,7 @@ export const enhance = (Base, {
                     this.defaultRegistry[key];
             }
 
-            return props;
+            return mapProps ? mapProps(props) : props;
         }
 
         constructor(props, currentContext) {
@@ -151,7 +152,7 @@ export const enhance = (Base, {
             if (typeof this.registry === 'function') {
                 this.registry = this.registry.context || {}
             }
-            this.defaultRegistry = context || {};
+            this.defaultRegistry = contextProps || {};
 
             if (!this.state) this.state = {};
 
