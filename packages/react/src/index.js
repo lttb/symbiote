@@ -83,7 +83,7 @@ export const {
 } = defaults;
 export const {Consumer, Provider} = RegistryContext;
 
-const symbol = key => typeof Symbol !== undefined ? Symbol(key) : `__${key}__`
+const symbol = key => `__${key}__`
 
 const SELF = symbol('self');
 const MERGE_PROPS = symbol('merge props');
