@@ -1,6 +1,6 @@
 {
   "name": "@symbiote/react",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "index.js",
   "author": "lttb <kenzhaev.artur@gmail.com>",
   "license": "MIT",
