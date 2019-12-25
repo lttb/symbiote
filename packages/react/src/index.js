@@ -45,7 +45,11 @@ export const createRegistry = () => {
                 });
             });
 
-            Comp.displayName = getOwnDisplayName(IComp) || Comp.displayName;
+            const displayName = getOwnDisplayName(IComp)
+
+            if (displayName && displayName !== 'Component') {
+                Comp.displayName = displayName;
+            }
 
             return Comp;
         };
