@@ -1,21 +1,21 @@
-import React from 'react';
-import nanoid from 'nanoid';
+import React from "react";
+import nanoid from "nanoid";
 
 const isClassComponent = Comp =>
-Comp === React.Component ||
-Comp === React.PureComponent ||
+    Comp === React.Component ||
+    Comp === React.PureComponent ||
     Boolean(
-        Comp && Comp.prototype && typeof Comp.prototype.render === 'function',
+        Comp && Comp.prototype && typeof Comp.prototype.render === "function"
     );
 
-const getDisplayName = Comp => Comp.displayName || Comp.name || 'Component';
+const getDisplayName = Comp => Comp.displayName || Comp.name || "Component";
 const getOwnDisplayName = Comp => {
-    if (Comp.hasOwnProperty('displayName')) {
-        return Comp.displayName
+    if (Comp.hasOwnProperty("displayName")) {
+        return Comp.displayName;
     }
 
-    return Comp.name
-}
+    return Comp.name;
+};
 
 export const createRegistry = () => {
     const registry = {};
@@ -28,26 +28,18 @@ export const createRegistry = () => {
         registry[name] = context;
 
         return IComp => {
-            class Comp extends enhance(Base, {
+            const Comp = enhance(Base, {
                 RegistryContext,
                 registry,
                 name,
-                context,
-            }) {}
-
-            // TODO: add property options
-            Object.keys(IComp).forEach(key => {
-                if (key === 'name') return;
-
-                Object.defineProperty(Comp, key, {
-                    value: IComp[key],
-                    writable: true,
-                });
+                context
             });
 
-            const displayName = getOwnDisplayName(IComp)
+            Object.assign(Comp, IComp);
 
-            if (displayName && displayName !== 'Component') {
+            const displayName = getOwnDisplayName(IComp);
+
+            if (displayName && displayName !== "Component") {
                 Comp.displayName = displayName;
             }
 
@@ -59,13 +51,13 @@ export const createRegistry = () => {
         static contextType = RegistryContext;
 
         render() {
-            const {children, ...props} = this.props;
+            const { children, ...props } = this.props;
 
             return (
                 <RegistryContext.Provider
                     value={{
                         ...this.context,
-                        ...props,
+                        ...props
                     }}
                 >
                     {children}
@@ -74,7 +66,7 @@ export const createRegistry = () => {
         }
     }
 
-    return {register, registry, RegistryContext, RegistryProvider};
+    return { register, registry, RegistryContext, RegistryProvider };
 };
 
 const defaults = createRegistry();
@@ -83,25 +75,28 @@ export const {
     register,
     registry,
     RegistryContext,
-    RegistryProvider,
+    RegistryProvider
 } = defaults;
-export const {Consumer, Provider} = RegistryContext;
+export const { Consumer, Provider } = RegistryContext;
 
-const symbol = key => `__${key}__`
+const symbol = key => `__${key}__`;
 
-const SELF = symbol('self');
-const MERGE_PROPS = symbol('merge props');
-const PROPS = symbol('props');
-const CONTEXT_PROPS = symbol('context props');
-const RENDER = symbol('render');
-const DI = symbol('di');
+const SELF = symbol("self");
+const MERGE_PROPS = symbol("merge props");
+const PROPS = symbol("props");
+const CONTEXT_PROPS = symbol("context props");
+const RENDER = symbol("render");
+const DI = symbol("di");
 
-export const enhance = (Base, {
-    RegistryContext = defaults.RegistryContext,
-    registry = defaults.registry,
-    name = nanoid(),
-    context = {},
-}) => {
+export const enhance = (
+    Base,
+    {
+        RegistryContext = defaults.RegistryContext,
+        registry = defaults.registry,
+        name = nanoid(),
+        context = {}
+    }
+) => {
     const Comp = isClassComponent(Base)
         ? Base
         : class BaseComponent extends React.Component {
@@ -110,29 +105,20 @@ export const enhance = (Base, {
               }
           };
 
-    let Parent = React.Component
-    let curr = Base
+    let Parent = React.Component;
+    let curr = Base;
 
     while (curr.__proto__) {
-        if (curr.__proto__ === React.Component) break
+        if (curr.__proto__ === React.Component) break;
         if (curr.__proto__ === React.PureComponent) {
-            Parent = React.PureComponent
+            Parent = React.PureComponent;
             break;
         }
-        curr = curr.__proto__
+        curr = curr.__proto__;
     }
 
     class RegistryComponent extends Parent {
-        static displayName = getDisplayName(Base);
-        static contextType = RegistryContext;
-        static registry = registry;
-        static toString = () => name;
-        static context = context;
-        static Base = Base;
-
-        static getDerivedStateFromError = Base.getDerivedStateFromError;
-
-        [MERGE_PROPS]({initial, ...props} = this.props) {
+        [MERGE_PROPS]({ initial, ...props } = this.props) {
             const context = this.context;
 
             if (initial) return Object.assign(props, this.defaultRegistry);
@@ -152,16 +138,16 @@ export const enhance = (Base, {
             super(props, currentContext);
 
             this.registry = currentContext[name] || {};
-            if (typeof this.registry === 'function') {
-                this.registry = this.registry.context || {}
+            if (typeof this.registry === "function") {
+                this.registry = this.registry.context || {};
             }
             this.defaultRegistry = context || {};
 
             if (!this.state) this.state = {};
 
             this.state = {};
-            this.state[SELF] = this
-            this.__setState__ = (...args) => this.setState(...args)
+            this.state[SELF] = this;
+            this.__setState__ = (...args) => this.setState(...args);
 
             if (this.registry.init) {
                 this[DI] = true;
@@ -174,7 +160,7 @@ export const enhance = (Base, {
                 const render = this.render.bind(this);
 
                 this.render = () => {
-                    if (typeof diRender === 'string') {
+                    if (typeof diRender === "string") {
                         return React.createElement(diRender, this.props);
                     }
 
@@ -184,8 +170,8 @@ export const enhance = (Base, {
         }
 
         render() {
-            this.__base__.props = this._props
-            this.__base__.state = this.state
+            this.__base__.props = this._props;
+            this.__base__.state = this.state;
             return this.__base__.render();
         }
 
@@ -198,48 +184,58 @@ export const enhance = (Base, {
                 nextProps = self[MERGE_PROPS](props); // self.props = nextProps;
             }
 
-            self._prevProps = self._props
-            self._prevState = state
+            self._prevProps = self._props;
+            self._prevState = state;
 
             self._props = nextProps;
 
-            let nextState = state
+            let nextState = state;
 
             if (!self.__base__) {
-                self.__base__ = new Comp(self._props, self.context)
-                self.__base__.setState = self.__setState__
+                self.__base__ = new Comp(self._props, self.context);
+                self.__base__.setState = self.__setState__;
                 nextState = self.__base__.state || state;
-                self.__base__.props = nextProps
+                self.__base__.props = nextProps;
 
                 if (self.__base__.componentDidMount) {
                     self.componentDidMount = () => {
-                        self.__base__.componentDidMount()
-                    }
+                        self.__base__.componentDidMount();
+                    };
                 }
                 if (self.__base__.shouldComponentUpdate) {
                     self.shouldComponentUpdate = (_, nextState) => {
-                        return self.__base__.shouldComponentUpdate(self._props, nextState)
-                    }
+                        return self.__base__.shouldComponentUpdate(
+                            self._props,
+                            nextState
+                        );
+                    };
                 }
                 if (self.__base__.getSnapshotBeforeUpdate) {
                     self.getSnapshotBeforeUpdate = (_, prevState) => {
-                        return self.__base__.getSnapshotBeforeUpdate(self._prevProps, prevState)
-                    }
+                        return self.__base__.getSnapshotBeforeUpdate(
+                            self._prevProps,
+                            prevState
+                        );
+                    };
                 }
                 if (self.__base__.componentDidUpdate) {
                     self.componentDidUpdate = (_, prevState, snapshot) => {
-                        self.__base__.componentDidUpdate(self._prevProps, prevState, snapshot)
-                    }
+                        self.__base__.componentDidUpdate(
+                            self._prevProps,
+                            prevState,
+                            snapshot
+                        );
+                    };
                 }
                 if (self.__base__.componentWillUnmount) {
                     self.componentWillUnmount = () => {
-                        self.__base__.componentWillUnmount()
-                    }
+                        self.__base__.componentWillUnmount();
+                    };
                 }
                 if (self.__base__.componentDidCatch) {
                     self.componentDidCatch = (error, info) => {
-                        self.__base__.componentDidCatch(error, info)
-                    }
+                        self.__base__.componentDidCatch(error, info);
+                    };
                 }
             }
 
@@ -247,14 +243,23 @@ export const enhance = (Base, {
                 nextState = Base.getDerivedStateFromProps(nextProps, nextState);
             }
 
-            nextState[SELF] = self
+            nextState[SELF] = self;
 
             // self.__base__.props = nextProps
             // self.__base__.state = nextState
 
             return nextState;
         }
-    };
+    }
 
-    return RegistryComponent
+    Object.assign(RegistryComponent, Base, {
+        displayName: getDisplayName(Base),
+        contextType: RegistryContext,
+        registry,
+        toString: () => name,
+        context,
+        Base
+    });
+
+    return RegistryComponent;
 };
