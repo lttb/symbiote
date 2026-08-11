@@ -15,7 +15,7 @@
     "cp:flow": "flow-copy-source src lib"
   },
   "dependencies": {
-    "nanoid": "^3.3.8"
+    "nanoid": "^3.3.17"
   },
   "peerDependencies": {
     "react": ">= 15.6.0"
